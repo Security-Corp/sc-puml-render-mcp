@@ -1,0 +1,39 @@
+{
+  "name": "sc-puml-render-mcp",
+  "version": "0.0.1",
+  "description": "MCP server that renders PlantUML diagrams inline in MCP-compatible chat clients (Claude, Codex).",
+  "type": "module",
+  "license": "Apache-2.0",
+  "bin": {
+    "sc-puml-render-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "echo \"TODO: wire up test runner\" && exit 0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "plantuml",
+    "diagram",
+    "uml",
+    "claude"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^20.0.0"
+  }
+}

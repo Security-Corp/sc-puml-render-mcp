@@ -1,0 +1,16 @@
+{
+  "name": "sc-puml-render-mcp-workspace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Workspace root for the sc-puml-render-mcp connector and its spikes.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm -F server build",
+    "test": "pnpm -F server test"
+  },
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@9.0.0"
+}

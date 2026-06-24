@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Spike scratch output
+spikes/**/out/
+*.png
+*.svg
+!docs/**/*.svg
+
+# Env / secrets
+.env
+.env.*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.log

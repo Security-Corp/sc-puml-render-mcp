@@ -1,0 +1,14 @@
+{
+  "name": "wasm-node-render",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Faz 0 spike: prove PlantUML WASM/JS renders headless in Node.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
