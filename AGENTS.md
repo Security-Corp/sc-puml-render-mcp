@@ -8,9 +8,12 @@
 
 `sc-puml-render-mcp` is an open-source **Model Context Protocol (MCP) server** that renders
 PlantUML source into images so the diagram appears **inline in MCP-compatible chat clients**
-(Claude Desktop / Claude Code and OpenAI Codex). The differentiators over existing PlantUML MCP servers are: (1) a **self-contained,
-dependency-free default render path** (no Java, no Graphviz, no web server), (2) **pluggable
-render engines**, and (3) **`!include` graph resolution** for multi-file arc42 / C4 diagrams.
+(Claude Desktop / Claude Code and OpenAI Codex). The differentiators over existing PlantUML MCP
+servers are: (1) a **self-contained default render path** with no Java, no external Graphviz
+binary, no Docker, and no web server, (2) **pluggable render engines**, and (3) **`!include`
+graph resolution** for multi-file arc42 / C4 diagrams. The default path is not dependency-free:
+it uses bundled npm/WASM dependencies for PlantUML, DOM compatibility, fonts, and SVG-to-PNG
+rasterization.
 
 Target users develop and use this on banking / financial-sector machines, so **not leaking
 diagram source to external servers by default** is a hard requirement, not a preference.
@@ -46,8 +49,10 @@ pnpm -F wasm-node-render dev   # run the Faz 0 spike
    inline display. See ADR-004.
 2. **All rendering goes through the `RenderEngine` interface** (`core/engine.ts`). Concrete
    engines (`wasm`, `remote`, `jar`) are selected at runtime via config. See ADR-001.
-3. **`wasm` is the default engine.** It must work with zero external runtime dependencies.
-   `remote` (user-supplied `PLANTUML_SERVER_URL`) and `jar` (local Java) are opt-in fallbacks.
+3. **`wasm` is the default engine.** It must work with no Java, no external Graphviz binary, no
+   Docker, and no rendering web server. It may use bundled npm/WASM runtime dependencies such as
+   `@plantuml/core`, `jsdom`, bundled fonts, and an in-process SVG-to-PNG rasterizer. `remote`
+   (user-supplied `PLANTUML_SERVER_URL`) and `jar` (local Java) are opt-in fallbacks.
 4. **Default behaviour must not send diagram source off-machine.** `remote` engine is only used
    when the user explicitly configures a server URL.
 5. **GitHub access is via tool chaining, not embedded auth.** For single files, Claude's own
@@ -75,7 +80,7 @@ pnpm -F wasm-node-render dev   # run the Faz 0 spike
 
 - **Faz 0 — Spike (highest risk first):** prove `plantuml-core` / `plantuml.js` renders headless
   in Node. Output: a PNG written to disk from a `.puml` string. If it fails, fall back to the
-  `jar` engine and revise the "zero-dependency" claim. → `spikes/wasm-node-render`
+  `jar` engine and revise the default-render claim. → `spikes/wasm-node-render`
 - **Faz 1:** `render_diagram` tool + inline PNG result via the `wasm` engine.
 - **Faz 2:** `!include` resolver + `filesystem` source.
 - **Faz 3:** `remote` and `jar` engines behind config (covers "user's own server" + IDE-plugin-

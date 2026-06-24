@@ -9,9 +9,10 @@ PlantUML is fundamentally a Java application that depends on Graphviz for many d
 There is no mature pure-JS reimplementation of the PlantUML *language*. The available render
 paths are:
 
-- **WASM/JS** — the official `plantuml-core` / `plantuml.js` build (TeaVM + Viz.js) runs PlantUML
-  entirely in JavaScript with no Java, Graphviz, or server. It is, however, browser-targeted;
-  headless Node support is unverified.
+- **WASM/JS** — the official `@plantuml/core` / `plantuml.js` build (TeaVM + Viz.js) runs
+  PlantUML in JavaScript with no Java, no external Graphviz binary, and no server. It is,
+  however, browser-targeted and needs Node compatibility shims plus an SVG-to-PNG rasterization
+  step for inline PNG output.
 - **Local Java (`plantuml.jar`)** — via `node-plantuml` or a subprocess. No web server, but
   requires a JRE (and Graphviz for some diagram types).
 - **Remote HTTP server** — encode source and GET from a PlantUML server (public or self-hosted).
@@ -25,7 +26,9 @@ Constraints: confidentiality (no source off-machine by default) and zero-frictio
 Define a single `RenderEngine` interface in `core/engine.ts`. Provide three implementations
 selected at runtime via config (`engine: wasm | remote | jar`):
 
-- `wasm` — **default**. Self-contained, no external runtime dependencies.
+- `wasm` — **default**. Self-contained inside the npm package with bundled JavaScript/WASM/font
+  dependencies. It requires no Java, no external Graphviz binary, no Docker, and no rendering web
+  server. Diagram source stays on the machine.
 - `remote` — uses a user-supplied `PLANTUML_SERVER_URL` (their own / company server). This is
   the "user's own web server" and IDE-plugin-style flexibility requirement.
 - `jar` — local Java fallback.
@@ -34,8 +37,8 @@ selected at runtime via config (`engine: wasm | remote | jar`):
 
 ## Consequences
 
-- The "zero-dependency default" claim hinges on the WASM-in-Node spike (Faz 0). If it fails, the
-  default falls back to `jar` and the install story changes — this ADR would be superseded.
+- The default render path is not dependency-free. It depends on bundled npm packages for the
+  official PlantUML JS build, DOM compatibility, fonts, and SVG-to-PNG rasterization.
 - Adding a future engine (e.g. a different WASM build) is a new file in `engines/`, no changes
   to `core` or `tools`.
 - Config surface stays small: one engine selector plus engine-specific options.
