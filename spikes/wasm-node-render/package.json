@@ -8,7 +8,13 @@
     "dev": "tsx index.ts"
   },
   "devDependencies": {
-    "tsx": "^4.0.0",
-    "@types/node": "^20.0.0"
+    "@types/jsdom": "28.0.3",
+    "@types/node": "^20.0.0",
+    "jsdom": "29.1.1",
+    "tsx": "^4.0.0"
+  },
+  "dependencies": {
+    "@plantuml/core": "1.2026.6",
+    "@resvg/resvg-js": "2.6.2"
   }
 }
