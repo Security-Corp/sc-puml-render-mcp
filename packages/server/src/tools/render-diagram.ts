@@ -1,8 +1,12 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult, ContentBlock } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
+import type { IncludeResolverOptions } from "../core/include-resolver.js";
+import { resolveIncludes } from "../core/include-resolver.js";
 import type { DiagramFormat, RenderArtifact, RenderEngine } from "../core/engine.js";
 import { toImageContentBlock, toSvgResourceContentBlock } from "../core/image-result.js";
+import { FilesystemSource } from "../sources/filesystem-source.js";
+import { TextSource } from "../sources/text-source.js";
 
 /**
  * `render_diagram` — core tool. Takes PlantUML text, returns an inline image
@@ -14,6 +18,8 @@ import { toImageContentBlock, toSvgResourceContentBlock } from "../core/image-re
 export interface RenderDiagramDeps {
   readonly engine: RenderEngine;
   readonly defaultFormat: DiagramFormat;
+  readonly filesystemBaseDir: string;
+  readonly includeResolverOptions: IncludeResolverOptions;
 }
 
 export const RENDER_DIAGRAM_TOOL = {
@@ -23,12 +29,14 @@ export const RENDER_DIAGRAM_TOOL = {
 } as const;
 
 export const RENDER_DIAGRAM_INPUT_SCHEMA = {
-  source: z.string().min(1, "PlantUML source is required"),
+  source: z.string().min(1, "PlantUML source is required").optional(),
+  filePath: z.string().min(1, "PlantUML file path is required").optional(),
   format: z.enum(["png", "svg"]).optional(),
 } as const;
 
 export type RenderDiagramInput = {
-  readonly source: string;
+  readonly source?: string;
+  readonly filePath?: string;
   readonly format?: DiagramFormat;
 };
 
@@ -49,12 +57,10 @@ export async function renderDiagram(
   input: RenderDiagramInput,
   deps: RenderDiagramDeps
 ): Promise<CallToolResult> {
-  if (!input.source.trim()) {
-    throw new Error("PlantUML source is required");
-  }
+  const source = await resolveRenderInput(input, deps);
 
   const result = await deps.engine.render({
-    source: input.source,
+    source,
     format: input.format ?? deps.defaultFormat,
   });
 
@@ -71,4 +77,23 @@ export async function renderDiagram(
 
 function isSvgArtifact(artifact: RenderArtifact): boolean {
   return artifact.format === "svg";
+}
+
+async function resolveRenderInput(
+  input: RenderDiagramInput,
+  deps: RenderDiagramDeps
+): Promise<string> {
+  if (input.source && input.filePath) {
+    throw new Error("Provide either source or filePath, not both.");
+  }
+  if (input.filePath) {
+    return resolveIncludes(
+      new FilesystemSource({ baseDir: deps.filesystemBaseDir, entryPath: input.filePath }),
+      deps.includeResolverOptions
+    );
+  }
+  if (input.source) {
+    return resolveIncludes(new TextSource(input.source), deps.includeResolverOptions);
+  }
+  throw new Error("PlantUML source or filePath is required.");
 }

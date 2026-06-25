@@ -59,10 +59,18 @@ wrappers (ADR-005). Full detail in `docs/architecture.md`.
   still part of Faz 4 distribution verification.
 
 ### Faz 2 — Includes + filesystem source
-- **Deliverable:** `include-resolver` + `FilesystemSource`; `resolve_includes` and `validate`
-  tools.
-- **Acceptance:** a multi-file arc42/C4 diagram with local `!include`s renders correctly;
-  remote includes gated by allowlist + depth/size limits; path traversal prevented.
+- **Status:** Complete on 2026-06-25.
+- [x] `FilesystemSource` reads local PlantUML files within a configured base directory.
+- [x] Path traversal and symlink escapes are rejected after canonical `realpath` checks.
+- [x] `include-resolver` flattens local `!include`, `!include_many`, and `!include_once` graphs.
+- [x] `!includeurl` is denied by default and fetched only for explicitly allowlisted hosts.
+- [x] Include cycle detection, maximum depth, and total size limits are enforced.
+- [x] `resolve_includes` returns flattened PlantUML text.
+- [x] `validate` returns structured `{ ok, line?, message?, suggestion? }` results.
+- [x] `render_diagram` accepts either inline source or a file path and resolves includes before
+  rendering.
+- **Acceptance:** `pnpm test` passes at the workspace root, including traversal, symlink escape,
+  remote allowlist deny/allow, cycle, depth, size, validate, and MCP stdio registration tests.
 
 ### Faz 3 — Remote + jar engines
 - **Deliverable:** `RemoteEngine` (encode + GET/POST to `PLANTUML_SERVER_URL`) and `JarEngine`

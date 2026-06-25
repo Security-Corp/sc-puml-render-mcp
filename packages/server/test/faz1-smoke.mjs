@@ -79,13 +79,20 @@ state "Payment Lifecycle WWWWWWWWWWWWW" as Payment {
 ];
 
 const engine = new WasmEngine();
+const defaultToolDeps = {
+  engine,
+  defaultFormat: "png",
+  filesystemBaseDir: process.cwd(),
+  includeResolverOptions: {
+    maxDepth: 10,
+    maxTotalBytes: 1_000_000,
+    remoteAllowlist: [],
+  },
+};
 
 for (const fixture of fixtures) {
   const startedAt = performance.now();
-  const result = await renderDiagram(
-    { source: fixture.source },
-    { engine, defaultFormat: "png" }
-  );
+  const result = await renderDiagram({ source: fixture.source }, defaultToolDeps);
   const elapsedMs = performance.now() - startedAt;
   const image = result.content.find((block) => block.type === "image");
   const resource = result.content.find((block) => block.type === "resource");
@@ -114,7 +121,7 @@ for (const fixture of fixtures) {
 
 const svgOnly = await renderDiagram(
   { source: fixtures[0].source, format: "svg" },
-  { engine, defaultFormat: "png" }
+  defaultToolDeps
 );
 assert.equal(svgOnly.content.length, 1);
 assert.equal(svgOnly.content[0].type, "resource");
