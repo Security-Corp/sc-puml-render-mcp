@@ -30,7 +30,7 @@ export class WasmEngine {
         }
         return {
             format: "png",
-            bytes: rasterizeSvgToPng(svg, env.fontBuffers),
+            bytes: rasterizeSvgToPng(svg, env.fontBuffers, req.targetWidth),
             mimeType: "image/png",
             additionalArtifacts: [svgResult],
         };
@@ -233,8 +233,8 @@ async function runPlantUmlOperation(operation) {
         release();
     }
 }
-function rasterizeSvgToPng(svg, fontBuffers) {
-    const resvg = new Resvg(svg, {
+function rasterizeSvgToPng(svg, fontBuffers, targetWidth) {
+    const options = {
         background: "white",
         font: {
             fontBuffers: [...fontBuffers],
@@ -242,7 +242,9 @@ function rasterizeSvgToPng(svg, fontBuffers) {
             sansSerifFamily: "DejaVu Sans",
             monospaceFamily: "DejaVu Sans Mono",
         },
-    });
+        ...(targetWidth === undefined ? {} : { fitTo: { mode: "width", value: targetWidth } }),
+    };
+    const resvg = new Resvg(svg, options);
     let image;
     try {
         image = resvg.render();

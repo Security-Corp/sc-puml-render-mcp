@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { access, readFile } from "node:fs/promises";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { performance } from "node:perf_hooks";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -113,6 +115,7 @@ for (const fixture of fixtures) {
   for (const label of fixture.labels) {
     assert.ok(svg.includes(label), `${fixture.name}: SVG missing label ${label}`);
   }
+  await assertMarkdownPngMetadata(result, fixture.name);
 
   console.log(
     `${fixture.name}: ${size.width}x${size.height}, ${png.length} PNG bytes, ${svg.length} SVG chars, ${elapsedMs.toFixed(1)}ms`
@@ -126,6 +129,12 @@ const svgOnly = await renderDiagram(
 assert.equal(svgOnly.content.length, 1);
 assert.equal(svgOnly.content[0].type, "resource");
 assert.equal(svgOnly.content[0].resource.mimeType, "image/svg+xml");
+assert.equal(svgOnly.structuredContent.ok, true);
+assert.equal(svgOnly.structuredContent.format, "svg");
+assert.equal(svgOnly.structuredContent.mimeType, "image/svg+xml");
+assert.equal(svgOnly.structuredContent.filePath, undefined);
+assert.equal(svgOnly.structuredContent.markdownImage, undefined);
+assert.equal(svgOnly.structuredContent.image, undefined);
 
 await assertMcpStdioClient();
 
@@ -141,6 +150,41 @@ function pngSize(buffer) {
     width: buffer.readUInt32BE(16),
     height: buffer.readUInt32BE(20),
   };
+}
+
+async function assertMarkdownPngMetadata(result, fixtureName) {
+  const structured = result.structuredContent;
+  assert.ok(structured, `${fixtureName}: expected structured metadata`);
+  assert.equal(structured.ok, true, `${fixtureName}: expected ok metadata`);
+  assert.equal(structured.format, "png", `${fixtureName}: expected png metadata`);
+  assert.equal(structured.mimeType, "image/png", `${fixtureName}: expected image/png metadata`);
+  assert.equal(typeof structured.filePath, "string", `${fixtureName}: expected PNG file path`);
+  assert.ok(path.isAbsolute(structured.filePath), `${fixtureName}: expected absolute PNG path`);
+  assert.equal(
+    structured.markdownImage,
+    `![PlantUML diagram](${structured.filePath})`,
+    `${fixtureName}: expected Markdown image string`
+  );
+  assert.equal(structured.image.filePath, structured.filePath, `${fixtureName}: nested file path`);
+  assert.equal(
+    structured.image.markdownImage,
+    structured.markdownImage,
+    `${fixtureName}: nested Markdown image string`
+  );
+
+  await access(structured.filePath);
+  const fileBytes = await readFile(structured.filePath);
+  assertValidPng(fileBytes, `${fixtureName} metadata file`);
+  const fileSize = pngSize(fileBytes);
+  assert.ok(fileSize.width >= 1000, `${fixtureName}: metadata PNG width ${fileSize.width}`);
+  assert.equal(structured.width, fileSize.width, `${fixtureName}: metadata width`);
+  assert.equal(structured.height, fileSize.height, `${fixtureName}: metadata height`);
+  assert.equal(structured.image.width, fileSize.width, `${fixtureName}: nested metadata width`);
+  assert.equal(structured.image.height, fileSize.height, `${fixtureName}: nested metadata height`);
+
+  const image = result.content.find((block) => block.type === "image");
+  assert.ok(image, `${fixtureName}: expected image block for metadata comparison`);
+  assert.deepEqual(Buffer.from(image.data, "base64"), fileBytes, `${fixtureName}: file matches image block`);
 }
 
 async function assertMcpStdioClient() {
@@ -178,6 +222,7 @@ async function assertMcpStdioClient() {
     assertValidPng(Buffer.from(image.data, "base64"), "mcp-stdio-client");
     assert.ok(resource, "MCP client call should return SVG resource");
     assert.equal(resource.resource.mimeType, "image/svg+xml");
+    await assertMarkdownPngMetadata(result, "mcp-stdio-client");
   } finally {
     await client.close();
   }
