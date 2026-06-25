@@ -1,7 +1,7 @@
 # sc-puml-render-mcp
 
 An open-source **Model Context Protocol (MCP) server** that renders [PlantUML](https://plantuml.com)
-diagrams **inline in the Claude Desktop / Claude Code chat**.
+diagrams **inline in Codex Desktop / Claude Code chat**.
 
 Write PlantUML in a design conversation, get the rendered diagram back in the same chat — no
 context switching to a separate tool, and (by default) **without sending your diagram source to
@@ -47,6 +47,10 @@ codex plugin add sc-puml-render@sc-puml-render-mcp
 Restart Codex Desktop after reinstalling so MCP tools are loaded in a fresh thread. You should see
 `render_diagram`, `resolve_includes`, and `validate`.
 
+The Codex plugin also ships a `plantuml-inline-render` skill. When the skill is active, Codex should
+proactively call `render_diagram` whenever it is about to answer with PlantUML source, so the chat
+shows both the PUML code and the rendered PNG without a second "render this" prompt.
+
 **Add the marketplace and install** (in Claude Code):
 
 ```text
@@ -79,9 +83,10 @@ token or credential is stored in this repo — installation relies entirely on y
 > @enduml
 > ```
 
-Codex or Claude calls `render_diagram` and the diagram appears inline as a PNG. Use `validate` to check
-syntax without rendering, and `resolve_includes` to expand `!include` graphs for multi-file
-diagrams.
+Codex or Claude calls `render_diagram` and the diagram appears inline as a PNG. In Codex, the
+bundled skill is what turns PlantUML-in-a-reply into a proactive tool call; the plugin does not add
+a native Codex UI code-fence renderer. Use `validate` to check syntax without rendering, and
+`resolve_includes` to expand `!include` graphs for multi-file diagrams.
 
 ## Status / roadmap
 

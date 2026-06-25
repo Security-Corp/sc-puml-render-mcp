@@ -43,8 +43,9 @@ The built server lives at `packages/server/dist/index.js` and is **unbundled** (
    overridable through the user's shell environment.
 
 3. **Codex manifest is explicit.** Codex Desktop requires `.codex-plugin/plugin.json` and the
-   manifest declares `mcpServers: "./.mcp.json"`. Unsupported Codex manifest fields such as
-   `hooks` are not used there; Claude Code keeps its own `.claude-plugin/plugin.json`.
+   manifest declares `mcpServers: "./.mcp.json"` plus `skills: "./skills/"`. Unsupported Codex
+   manifest fields such as `hooks` are not used there; Claude Code keeps its own
+   `.claude-plugin/plugin.json`.
 
 4. **Thin wrapper only.** This slice adds manifests, `.mcp.json`, docs, and this ADR. It does not
    touch `core/`, `tools/`, `engines/`, or `sources/`. AGENTS.md invariants hold unchanged: renders
@@ -60,6 +61,11 @@ The built server lives at `packages/server/dist/index.js` and is **unbundled** (
    `pnpm install --prod --frozen-lockfile --filter sc-puml-render-mcp` only when runtime
    dependencies are missing. The scripts do not run a TypeScript build; source changes must still be
    built by maintainers before pushing.
+
+7. **Agent behavior is separate from MCP rendering.** The MCP server returns inline PNG image
+   blocks when called. The Codex skill tells the agent to call `render_diagram` proactively when it
+   is about to answer with PlantUML source; automatic rendering of arbitrary `plantuml` code fences
+   would require Codex UI support outside this plugin.
 
 ## Consequences
 

@@ -1,6 +1,6 @@
 {
   "name": "sc-puml-render",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Render PlantUML diagrams inline in Codex and Claude-compatible MCP clients with a local WASM engine.",
   "author": {
     "name": "Security-Corp",
@@ -10,6 +10,7 @@
   "repository": "https://github.com/Security-Corp/sc-puml-render-mcp",
   "license": "Apache-2.0",
   "keywords": ["plantuml", "mcp", "diagram", "uml", "wasm", "codex"],
+  "skills": "./skills/",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "SC PlantUML Render",
