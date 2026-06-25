@@ -11,6 +11,8 @@ export interface RenderRequest {
     readonly source: string;
     /** Desired output format. PNG is the inline-safe default (ADR-004). */
     readonly format: DiagramFormat;
+    /** Optional target PNG width in pixels. SVG renders ignore this option. */
+    readonly targetWidth?: number;
 }
 export interface RenderArtifact {
     readonly format: DiagramFormat;

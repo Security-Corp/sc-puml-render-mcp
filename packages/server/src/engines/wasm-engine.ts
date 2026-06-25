@@ -5,6 +5,7 @@ import { JSDOM } from "jsdom";
 import opentype from "opentype.js";
 import type { Font, RenderOptions } from "opentype.js";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
+import type { ResvgRenderOptions } from "@resvg/resvg-wasm";
 import type { RenderEngine, RenderRequest, RenderResult } from "../core/engine.js";
 
 type RenderToString = (
@@ -74,7 +75,7 @@ export class WasmEngine implements RenderEngine {
 
     return {
       format: "png",
-      bytes: rasterizeSvgToPng(svg, env.fontBuffers),
+      bytes: rasterizeSvgToPng(svg, env.fontBuffers, req.targetWidth),
       mimeType: "image/png",
       additionalArtifacts: [svgResult],
     };
@@ -324,8 +325,12 @@ async function runPlantUmlOperation<T>(operation: () => Promise<T>): Promise<T> 
   }
 }
 
-function rasterizeSvgToPng(svg: string, fontBuffers: readonly Uint8Array[]): Uint8Array {
-  const resvg = new Resvg(svg, {
+function rasterizeSvgToPng(
+  svg: string,
+  fontBuffers: readonly Uint8Array[],
+  targetWidth?: number
+): Uint8Array {
+  const options: ResvgRenderOptions = {
     background: "white",
     font: {
       fontBuffers: [...fontBuffers],
@@ -333,7 +338,9 @@ function rasterizeSvgToPng(svg: string, fontBuffers: readonly Uint8Array[]): Uin
       sansSerifFamily: "DejaVu Sans",
       monospaceFamily: "DejaVu Sans Mono",
     },
-  });
+    ...(targetWidth === undefined ? {} : { fitTo: { mode: "width", value: targetWidth } }),
+  };
+  const resvg = new Resvg(svg, options);
   let image: ReturnType<InstanceType<typeof Resvg>["render"]> | undefined;
 
   try {

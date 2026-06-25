@@ -7,7 +7,8 @@ import type { DiagramFormat, RenderEngine } from "../core/engine.js";
  * `render_diagram` — core tool. Takes PlantUML text, returns an inline image
  * content block (PNG by default, ADR-004).
  *
- * Annotation: READ-ONLY. It produces an image; it does not mutate user state.
+ * Annotation: READ-ONLY. It produces an image and may write a temp/cache PNG
+ * artifact for Markdown embedding; it does not mutate user state.
  * (Required for directory submission — keep annotations accurate.)
  */
 export interface RenderDiagramDeps {
@@ -27,11 +28,15 @@ export declare const RENDER_DIAGRAM_INPUT_SCHEMA: {
         png: "png";
         svg: "svg";
     }>>;
+    readonly writeFile: z.ZodOptional<z.ZodBoolean>;
+    readonly targetWidth: z.ZodOptional<z.ZodNumber>;
 };
 export type RenderDiagramInput = {
     readonly source?: string;
     readonly filePath?: string;
     readonly format?: DiagramFormat;
+    readonly writeFile?: boolean;
+    readonly targetWidth?: number;
 };
 export declare function registerRenderDiagramTool(server: McpServer, deps: RenderDiagramDeps): void;
 export declare function renderDiagram(input: RenderDiagramInput, deps: RenderDiagramDeps): Promise<CallToolResult>;

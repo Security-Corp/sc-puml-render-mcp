@@ -16,18 +16,23 @@ PNG/JPEG conversion unless they explicitly asked for source code only.
 1. Include the PlantUML source in a fenced `plantuml` code block when the user should see or reuse
    the source.
 2. Call `mcp__sc_puml_render.render_diagram` with the exact same `source` and `format: "png"` before
-   the final response so the diagram appears inline in chat.
+   the final response. Omit `writeFile` or set it to `true` so the default file-backed Markdown
+   output is available.
 3. If the source comes from a local `.puml`, `.plantuml`, or `.iuml` file and the user wants that
    file rendered, call `render_diagram` with `filePath` instead.
-4. Use `mcp__sc_puml_render.validate` first when syntax is uncertain or when the user asks for a
+4. In the final response, insert the returned `structuredContent.markdownImage` string exactly as
+   Markdown so Codex can display the local PNG inline in the assistant message.
+5. Use `mcp__sc_puml_render.validate` first when syntax is uncertain or when the user asks for a
    syntax check.
-5. Use `mcp__sc_puml_render.resolve_includes` for multi-file diagrams before rendering or explaining
+6. Use `mcp__sc_puml_render.resolve_includes` for multi-file diagrams before rendering or explaining
    include graphs.
-6. If rendering fails, keep the PlantUML source in the answer and briefly report the render error.
+7. If rendering fails, keep the PlantUML source in the answer and briefly report the render error.
 
 ## Output Rules
 
 - Prefer PNG for inline chat display.
+- Do not write "shown above" or similar unless the final response itself contains the
+  `markdownImage` Markdown image.
 - Do not describe the plugin mechanics unless the user asks.
 - Do not ask the user for a second prompt like "render this" when the current task already includes
   PlantUML output.

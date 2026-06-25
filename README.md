@@ -14,7 +14,10 @@ any external server**.
 Most existing PlantUML MCP servers either return a file path / URL (no inline render) or depend
 on Java, Graphviz, or an external PlantUML server. This one aims for:
 
-- **Inline rendering** — returns an image content block the chat displays directly.
+- **MCP tool-result inline rendering** — returns an image content block compatible clients can
+  display directly in the tool result.
+- **Assistant Markdown inline rendering** — for PNG renders, writes a local temp PNG and returns
+  a Markdown image string the assistant can embed in the final chat response.
 - **Self-contained default** — a WASM render engine with no Java / Graphviz / Docker / web server.
 - **Confidential by default** — diagram source stays on your machine unless you opt into a remote
   engine.
@@ -48,8 +51,9 @@ Restart Codex Desktop after reinstalling so MCP tools are loaded in a fresh thre
 `render_diagram`, `resolve_includes`, and `validate`.
 
 The Codex plugin also ships a `plantuml-inline-render` skill. When the skill is active, Codex should
-proactively call `render_diagram` whenever it is about to answer with PlantUML source, so the chat
-shows both the PUML code and the rendered PNG without a second "render this" prompt.
+proactively call `render_diagram` whenever it is about to answer with PlantUML source, then insert
+the returned `structuredContent.markdownImage` string into the final response. This gives Codex a
+stable local PNG path to render in the assistant message, without a second "render this" prompt.
 
 **Add the marketplace and install** (in Claude Code):
 
@@ -83,10 +87,12 @@ token or credential is stored in this repo — installation relies entirely on y
 > @enduml
 > ```
 
-Codex or Claude calls `render_diagram` and the diagram appears inline as a PNG. In Codex, the
-bundled skill is what turns PlantUML-in-a-reply into a proactive tool call; the plugin does not add
-a native Codex UI code-fence renderer. Use `validate` to check syntax without rendering, and
-`resolve_includes` to expand `!include` graphs for multi-file diagrams.
+Codex or Claude calls `render_diagram` and the tool result includes a PNG `image` content block.
+For Codex assistant responses, the same result also includes a temp-file-backed Markdown image
+string such as `![PlantUML diagram](/absolute/path/to/file.png)`; the bundled skill tells Codex to
+place that string in the final answer. The plugin does not add a native Codex UI code-fence
+renderer. Use `validate` to check syntax without rendering, and `resolve_includes` to expand
+`!include` graphs for multi-file diagrams.
 
 ## Status / roadmap
 
