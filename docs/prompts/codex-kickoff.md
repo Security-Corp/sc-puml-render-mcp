@@ -29,6 +29,11 @@ an open-source **TypeScript MCP server** named `sc-puml-render-mcp`.
 
 # Context
 
+- **Working directory & paths:** the working directory is
+  `/Users/alphan.arslan/CodeRepository/pocws/claude_connectors/`. **All code you write goes
+  inside `sc-puml-render-mcp/`** under that directory — the project repo root is
+  `/Users/alphan.arslan/CodeRepository/pocws/claude_connectors/sc-puml-render-mcp`. Never create
+  or modify files outside `sc-puml-render-mcp/`.
 - Repo `sc-puml-render-mcp` is a **pnpm workspace**. Publishable connector lives in
   `packages/server`; throwaway experiments live in `spikes/*`.
 - **Architecture:** clean architecture, dependencies point inward
@@ -59,6 +64,11 @@ an open-source **TypeScript MCP server** named `sc-puml-render-mcp`.
   (class/component/state), not only a sequence diagram.
 - Prefer the **simplest** solution that satisfies the constraints (KISS). Fix root causes, not
   symptoms — if a fix feels like a workaround, surface the underlying problem instead.
+- **Handle uncertainty in tiers:** first check whether `AGENTS.md` or `docs/adr/` already answers
+  the question. If still unclear: for **small, reversible** decisions, proceed with an
+  **explicitly stated assumption** (note it as `Assumption:` in your output); but for anything
+  **irreversible, or affecting architecture / scope / a security constraint, or conflicting with
+  an ADR**, do NOT assume — stop and ask the human. Never fill an ambiguity silently.
 
 # Output format
 
@@ -71,6 +81,10 @@ an open-source **TypeScript MCP server** named `sc-puml-render-mcp`.
 - Record that verdict + answers as a dated **update in `docs/adr/ADR-001`** (or a new
   `docs/adr/ADR-00X` if the conclusion changes the architecture).
 - Keep chat output brief; put durable results in repo files, not long prose dumps.
+- **Interaction language:** when you communicate with the human (questions, status updates,
+  the verdict summary, anything addressed to them), write in **Turkish**. Keep all repo
+  artifacts in **English** — code, identifiers, comments, commit messages, ADRs, and other
+  committed docs stay English to match the existing repository conventions.
 
 # Stop conditions
 
