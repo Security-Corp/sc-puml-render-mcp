@@ -1,0 +1,1 @@
+{"version":3,"file":"remote-engine.js","sourceRoot":"","sources":["../../src/engines/remote-engine.ts"],"names":[],"mappings":"AAEA;;;;;;;;;;;GAWG;AACH,MAAM,OAAO,YAAY;IAGM;IAFpB,EAAE,GAAG,QAAQ,CAAC;IAEvB,YAA6B,SAAiB;QAAjB,cAAS,GAAT,SAAS,CAAQ;IAAG,CAAC;IAElD,KAAK,CAAC,MAAM,CAAC,IAAmB;QAC9B,MAAM,IAAI,KAAK,CAAC,mCAAmC,IAAI,CAAC,SAAS,EAAE,CAAC,CAAC;IACvE,CAAC;CACF"}

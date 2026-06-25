@@ -81,6 +81,9 @@ wrappers (ADR-005). Full detail in `docs/architecture.md`.
 ### Faz 4 — Distribution
 - **Deliverable:** npm publish; Claude Code plugin (marketplace); Claude Desktop MCPB; Codex
   `config.toml` snippet + `codex plugin`; finalized `PRIVACY.md` at a public URL.
+  - [x] Claude Code plugin (marketplace) — GitHub-URL installable scaffold (`.claude-plugin/`,
+    `.mcp.json`); minimum slice, build prerequisite documented. See ADR-008.
+  - [ ] npm publish · Claude Desktop MCPB · Codex `config.toml` / `codex plugin` · public `PRIVACY.md`
 - **Acceptance:** installable in each host via its native mechanism; per-tool annotations
   accurate; ≥3 working example prompts documented.
 - **Open verification:** confirm Codex desktop renders MCP `image` content blocks inline; if not,
