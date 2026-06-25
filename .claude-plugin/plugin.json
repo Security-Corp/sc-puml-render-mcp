@@ -1,7 +1,7 @@
 {
   "name": "sc-puml-render",
   "description": "Render PlantUML diagrams inline in Claude Code — in-process wasm engine, no Java/Graphviz/Docker, diagram source stays on-machine.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "Apache-2.0",
   "keywords": ["plantuml", "mcp", "diagram", "uml", "wasm"],
   "hooks": { "postInstall": "./hooks/postinstall.sh" }

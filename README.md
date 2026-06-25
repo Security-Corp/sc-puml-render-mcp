@@ -21,18 +21,31 @@ on Java, Graphviz, or an external PlantUML server. This one aims for:
 - **Pluggable engines** — `wasm` (default), `remote` (your own PlantUML server), `jar` (local Java).
 - **`!include` resolution** — for multi-file arc42 / C4 diagrams.
 
-## Install as a Claude Code plugin
+## Install as a Codex Desktop / Claude Code plugin
 
-This repo ships a Claude Code plugin + marketplace at its root (`.claude-plugin/`), so you can
-install the server straight from the GitHub repo — no npm publish, no public marketplace.
+This repo ships plugin metadata at its root for both Codex Desktop (`.codex-plugin/`) and
+Claude Code (`.claude-plugin/`), so you can install the server straight from the GitHub repo — no
+npm publish, no public marketplace.
 
-**Prerequisite — build the server first.** The plugin launches the built output and its runtime
-dependencies, which are not committed. Build them once:
+The plugin launches the checked-in server build at `packages/server/dist/index.js`. Runtime npm
+dependencies are installed by the plugin startup/bootstrap scripts when missing.
+
+For local development, rebuild the server after TypeScript changes:
 
 ```bash
 pnpm install
-pnpm -F server build      # produces packages/server/dist/index.js
+pnpm -F sc-puml-render-mcp build      # produces packages/server/dist/index.js
 ```
+
+**Add the marketplace and install** (in Codex Desktop / CLI):
+
+```bash
+codex plugin marketplace add Security-Corp/sc-puml-render-mcp
+codex plugin add sc-puml-render@sc-puml-render-mcp
+```
+
+Restart Codex Desktop after reinstalling so MCP tools are loaded in a fresh thread. You should see
+`render_diagram`, `resolve_includes`, and `validate`.
 
 **Add the marketplace and install** (in Claude Code):
 
@@ -48,9 +61,9 @@ To test against your local working tree instead of GitHub, add it by path:
 /plugin install sc-puml-render@sc-puml-render-mcp
 ```
 
-Restart Claude Code (or run `/reload-plugins`) so the MCP server loads. You then have three tools:
-`render_diagram`, `resolve_includes`, and `validate`, all running in-process with the default
-`wasm` engine — no Java / Graphviz / Docker, and your diagram source never leaves the machine.
+Restart Claude Code (or run `/reload-plugins`) so the MCP server loads. The tools run in-process
+with the default `wasm` engine — no Java / Graphviz / Docker, and your diagram source never leaves
+the machine.
 
 **Private repo note.** `sc-puml-render-mcp` is a private repository. `/plugin marketplace add`
 clones it using **your own git credentials** (`gh auth login`, or an SSH key in your agent). No
@@ -66,7 +79,7 @@ token or credential is stored in this repo — installation relies entirely on y
 > @enduml
 > ```
 
-Claude calls `render_diagram` and the diagram appears inline as a PNG. Use `validate` to check
+Codex or Claude calls `render_diagram` and the diagram appears inline as a PNG. Use `validate` to check
 syntax without rendering, and `resolve_includes` to expand `!include` graphs for multi-file
 diagrams.
 
