@@ -9,6 +9,8 @@ import { WasmEngine } from "../dist/engines/wasm-engine.js";
 import { renderDiagram } from "../dist/tools/render-diagram.js";
 
 const PNG_MAGIC = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const LEGACY_FORCED_TARGET_WIDTH = 1_200;
+const MAX_AUTO_TARGET_WIDTH = 2_000;
 
 const fixtures = [
   {
@@ -92,6 +94,21 @@ const defaultToolDeps = {
   },
 };
 
+const smallNativeSource = `@startuml
+Alice -> Bob: ok
+Bob --> Alice: done
+@enduml`;
+
+const wideCapSource = `@startuml
+title Wide auto-cap probe
+${Array.from(
+  { length: 8 },
+  (_, index) =>
+    `participant "Wide ${String(index + 1).padStart(2, "0")} WWWWWWWWWWWW" as P${index + 1}`
+).join("\n")}
+P1 -> P8: force enough natural width to exceed the inline raster cap
+@enduml`;
+
 for (const fixture of fixtures) {
   const startedAt = performance.now();
   const result = await renderDiagram({ source: fixture.source }, defaultToolDeps);
@@ -121,6 +138,8 @@ for (const fixture of fixtures) {
     `${fixture.name}: ${size.width}x${size.height}, ${png.length} PNG bytes, ${svg.length} SVG chars, ${elapsedMs.toFixed(1)}ms`
   );
 }
+
+await assertDefaultWidthPolicy();
 
 const svgOnly = await renderDiagram(
   { source: fixtures[0].source, format: "svg" },
@@ -152,6 +171,55 @@ function pngSize(buffer) {
   };
 }
 
+function imagePngSize(result, fixtureName) {
+  const image = result.content.find((block) => block.type === "image");
+  assert.ok(image, `${fixtureName}: expected image block`);
+  assert.equal(image.mimeType, "image/png", `${fixtureName}: expected image/png`);
+  const png = Buffer.from(image.data, "base64");
+  assertValidPng(png, fixtureName);
+  return pngSize(png);
+}
+
+async function assertDefaultWidthPolicy() {
+  const defaultSmall = await renderDiagram({ source: smallNativeSource }, defaultToolDeps);
+  const defaultSmallSize = imagePngSize(defaultSmall, "small default");
+  assert.ok(
+    defaultSmallSize.width < LEGACY_FORCED_TARGET_WIDTH,
+    `small default should stay native, got ${defaultSmallSize.width}px`
+  );
+  await assertMarkdownPngMetadata(defaultSmall, "small default");
+
+  const noFileSmall = await renderDiagram(
+    { source: smallNativeSource, writeFile: false },
+    defaultToolDeps
+  );
+  const noFileSmallSize = imagePngSize(noFileSmall, "small writeFile false");
+  assert.deepEqual(
+    noFileSmallSize,
+    defaultSmallSize,
+    "writeFile should not change raster dimensions when targetWidth is omitted"
+  );
+  assert.equal(noFileSmall.structuredContent.filePath, undefined);
+  assert.equal(noFileSmall.structuredContent.markdownImage, undefined);
+
+  const explicit = await renderDiagram(
+    { source: smallNativeSource, targetWidth: 640 },
+    defaultToolDeps
+  );
+  const explicitSize = imagePngSize(explicit, "explicit targetWidth");
+  assert.equal(explicitSize.width, 640, "explicit targetWidth should win");
+  await assertMarkdownPngMetadata(explicit, "explicit targetWidth");
+
+  const capped = await renderDiagram({ source: wideCapSource }, defaultToolDeps);
+  const cappedSize = imagePngSize(capped, "wide auto-cap");
+  assert.equal(cappedSize.width, MAX_AUTO_TARGET_WIDTH, "wide default render should auto-cap");
+  await assertMarkdownPngMetadata(capped, "wide auto-cap");
+
+  console.log(
+    `width-policy: native ${defaultSmallSize.width}px, explicit ${explicitSize.width}px, capped ${cappedSize.width}px`
+  );
+}
+
 async function assertMarkdownPngMetadata(result, fixtureName) {
   const structured = result.structuredContent;
   assert.ok(structured, `${fixtureName}: expected structured metadata`);
@@ -176,7 +244,6 @@ async function assertMarkdownPngMetadata(result, fixtureName) {
   const fileBytes = await readFile(structured.filePath);
   assertValidPng(fileBytes, `${fixtureName} metadata file`);
   const fileSize = pngSize(fileBytes);
-  assert.ok(fileSize.width >= 1000, `${fixtureName}: metadata PNG width ${fileSize.width}`);
   assert.equal(structured.width, fileSize.width, `${fixtureName}: metadata width`);
   assert.equal(structured.height, fileSize.height, `${fixtureName}: metadata height`);
   assert.equal(structured.image.width, fileSize.width, `${fixtureName}: nested metadata width`);

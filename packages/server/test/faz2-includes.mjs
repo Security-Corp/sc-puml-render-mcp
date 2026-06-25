@@ -416,7 +416,6 @@ async function assertMarkdownPngMetadata(result, fixtureName) {
   const fileBytes = await readFile(structured.filePath);
   assertValidPng(fileBytes, `${fixtureName} metadata file`);
   const fileSize = pngSize(fileBytes);
-  assert.ok(fileSize.width >= 1000, `${fixtureName}: metadata PNG width ${fileSize.width}`);
   assert.equal(structured.width, fileSize.width, `${fixtureName}: metadata width`);
   assert.equal(structured.height, fileSize.height, `${fixtureName}: metadata height`);
   assert.equal(structured.image.width, fileSize.width, `${fixtureName}: nested metadata width`);
