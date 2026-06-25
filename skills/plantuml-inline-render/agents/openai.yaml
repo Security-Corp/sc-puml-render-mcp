@@ -1,0 +1,11 @@
+interface:
+  display_name: "PlantUML Inline Render"
+  short_description: "Render PlantUML diagrams in chat automatically."
+  default_prompt: "Use $plantuml-inline-render to create and show a PlantUML diagram inline."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "sc-puml-render"
+      description: "Local MCP server exposing render_diagram, validate, and resolve_includes."
+policy:
+  allow_implicit_invocation: true
