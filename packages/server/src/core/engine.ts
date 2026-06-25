@@ -15,11 +15,19 @@ export interface RenderRequest {
   readonly format: DiagramFormat;
 }
 
-export interface RenderResult {
+export interface RenderArtifact {
   readonly format: DiagramFormat;
   /** Raw bytes of the rendered diagram (PNG bytes, or SVG UTF-8 bytes). */
   readonly bytes: Uint8Array;
   readonly mimeType: "image/png" | "image/svg+xml";
+}
+
+export interface RenderResult extends RenderArtifact {
+  /**
+   * Additional render products from the same engine pass. PNG callers may use
+   * this to expose SVG as a resource without triggering a second PlantUML render.
+   */
+  readonly additionalArtifacts?: readonly RenderArtifact[];
 }
 
 export interface RenderEngine {

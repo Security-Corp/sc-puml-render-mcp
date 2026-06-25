@@ -9,8 +9,8 @@
 
 Ship an open-source MCP server, `sc-puml-render-mcp`, that renders PlantUML **inline** in
 MCP-compatible chat clients (Claude Desktop / Claude Code and OpenAI Codex), and publish it to
-the relevant plugin marketplaces. Default render path must be self-contained (no Java, Graphviz,
-Docker, or web server) and must not send diagram source off-machine.
+the relevant plugin marketplaces. Default render path must require no Java, external Graphviz
+binary, Docker, or rendering web server, and must not send diagram source off-machine.
 
 ## 2. Scope
 
@@ -36,6 +36,7 @@ wrappers (ADR-005). Full detail in `docs/architecture.md`.
 ## 4. Phases, deliverables, acceptance criteria
 
 ### Faz 0 — WASM-in-Node spike (HIGHEST RISK, do first)
+- **Status:** Complete — `WASM-in-Node: PROVEN` on 2026-06-24.
 - **Deliverable:** working render in `spikes/wasm-node-render` producing a valid PNG to
   `out/spike.png` from a `.puml` string, headless in Node, no Java/Graphviz/server.
 - **Acceptance:** the PNG opens and is valid; a Graphviz-dependent diagram type (class/component)
@@ -45,10 +46,17 @@ wrappers (ADR-005). Full detail in `docs/architecture.md`.
   ADR-001, pivot default to `jar`).
 
 ### Faz 1 — Core render tool + inline
-- **Deliverable:** `WasmEngine` implemented; `render_diagram` registered; server runs over stdio
-  and returns an inline PNG.
-- **Acceptance:** in a real client, a PlantUML snippet renders inline in the chat; PNG default,
-  SVG available as resource.
+- **Status:** Complete on 2026-06-24.
+- [x] `WasmEngine` implemented on the proven `@plantuml/core` `renderToString` path.
+- [x] One PlantUML/jsdom renderer environment initialized and reused per process.
+- [x] SVG-to-PNG rasterization uses `@resvg/resvg-wasm` with bundled DejaVu TrueType fonts.
+- [x] `render_diagram` registered on an MCP stdio server and returns inline PNG `image` content.
+- [x] SVG is exposed as an MCP resource content block, not as inline SVG.
+- [x] Automated smoke/fidelity test asserts valid PNG magic bytes, SVG resource, one text-heavy
+  diagram, and component + state Graphviz-dependent diagrams.
+- [x] Automated MCP stdio client smoke test calls `render_diagram` through the built server.
+- **Acceptance:** `pnpm test` passes at the workspace root. A real-host inline rendering check is
+  still part of Faz 4 distribution verification.
 
 ### Faz 2 — Includes + filesystem source
 - **Deliverable:** `include-resolver` + `FilesystemSource`; `resolve_includes` and `validate`

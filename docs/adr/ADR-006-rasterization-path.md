@@ -57,3 +57,24 @@ runtime binaries, so it is the Faz 1 default.
   type because Faz 0's PlantUML measurement shims are approximate.
 - Packaging review must preserve the MPL-2.0 notice for `@resvg/resvg-wasm` and the font license
   notices for `dejavu-fonts-ttf` (ADR-002).
+
+## Update 2026-06-24 — Faz 1 implementation notes
+
+The publishable server pins `jsdom@22.1.0`. Local verification found that newer `jsdom` lines
+(`27.x` and `29.x`) pulled transitive CJS/ESM combinations that failed under plain Node.js before
+the MCP server could start. The spike had hidden this because it ran through `tsx`; the server
+must run as compiled ESM over stdio without a loader.
+
+The Faz 0 character-count measurement heuristic clipped a text-heavy sequence fixture: a long
+`W...` participant label overflowed its box. Faz 1 replaced the primary width calculation with
+`opentype.js@1.3.4` measuring the bundled `DejaVuSans.ttf`, while keeping a conservative fallback
+only for unexpected font-measurement errors. `opentype.js@2.0.0` was tested and rejected because
+it threw on DejaVu substitution tables.
+
+Faz 1 fidelity verification:
+
+| Fixture | Result |
+|---|---|
+| Text-heavy sequence | 904x231 PNG, valid magic bytes, no observed text clipping after TTF metrics |
+| Component diagram | 508x442 PNG, valid magic bytes, labels present in SVG resource |
+| State diagram | 556x473 PNG, valid magic bytes, labels present in SVG resource |

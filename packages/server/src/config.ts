@@ -4,7 +4,8 @@ import type { DiagramFormat } from "./core/engine.js";
  * Runtime configuration. Read from environment variables so it works for both
  * stdio (Claude Desktop / Claude Code) and MCPB packaging.
  *
- * Default engine is "wasm" — self-contained, no source leaves the machine.
+ * Default engine is "wasm" — no Java, external Graphviz, Docker, or web server;
+ * bundled npm/WASM dependencies render locally and no source leaves the machine.
  * "remote" requires the user to supply their own PLANTUML_SERVER_URL.
  */
 

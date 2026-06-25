@@ -35,6 +35,11 @@ package:
 - `dejavu-fonts-ttf@2.37.3` — Bitstream Vera / Arev font terms. The font copyright and
   permission notices must be preserved; the fonts must not be sold by themselves; modified fonts
   would need to be renamed. We ship them unmodified as a runtime font dependency.
+- `jsdom@22.1.0` — MIT. Used only as the Node DOM compatibility layer for the official
+  browser-targeted PlantUML build.
+- `opentype.js@1.3.4` — MIT. Used to measure bundled DejaVu TrueType text accurately enough for
+  PlantUML layout shims; `opentype.js@2.0.0` was not used because it threw on DejaVu substitution
+  tables during local verification.
 
 Practical packaging rule: for npm distribution, rely on the normal dependency tree to carry each
 dependency's license files; for MCPB or any bundled binary-style distribution, include prominent
