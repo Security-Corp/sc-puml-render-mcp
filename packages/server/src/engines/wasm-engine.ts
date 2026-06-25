@@ -47,6 +47,7 @@ type FontAssets = {
 
 const require = createRequire(import.meta.url);
 const RENDER_TIMEOUT_MS = 15_000;
+const MAX_AUTO_TARGET_WIDTH = 2_000;
 const FONT_RENDER_OPTIONS: RenderOptions = { kerning: true };
 let sharedEnvironment: Promise<RendererEnvironment> | undefined;
 let plantUmlQueue: Promise<void> = Promise.resolve();
@@ -330,7 +331,7 @@ function rasterizeSvgToPng(
   fontBuffers: readonly Uint8Array[],
   targetWidth?: number
 ): Uint8Array {
-  const options: ResvgRenderOptions = {
+  const baseOptions: ResvgRenderOptions = {
     background: "white",
     font: {
       fontBuffers: [...fontBuffers],
@@ -338,9 +339,19 @@ function rasterizeSvgToPng(
       sansSerifFamily: "DejaVu Sans",
       monospaceFamily: "DejaVu Sans Mono",
     },
-    ...(targetWidth === undefined ? {} : { fitTo: { mode: "width", value: targetWidth } }),
   };
-  const resvg = new Resvg(svg, options);
+  let resvg = new Resvg(svg, baseOptions);
+  const effectiveTargetWidth =
+    targetWidth ?? (resvg.width > MAX_AUTO_TARGET_WIDTH ? MAX_AUTO_TARGET_WIDTH : undefined);
+
+  if (effectiveTargetWidth !== undefined) {
+    resvg.free();
+    resvg = new Resvg(svg, {
+      ...baseOptions,
+      fitTo: { mode: "width", value: effectiveTargetWidth },
+    });
+  }
+
   let image: ReturnType<InstanceType<typeof Resvg>["render"]> | undefined;
 
   try {

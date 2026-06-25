@@ -6,6 +6,7 @@ import opentype from "opentype.js";
 import { initWasm, Resvg } from "@resvg/resvg-wasm";
 const require = createRequire(import.meta.url);
 const RENDER_TIMEOUT_MS = 15_000;
+const MAX_AUTO_TARGET_WIDTH = 2_000;
 const FONT_RENDER_OPTIONS = { kerning: true };
 let sharedEnvironment;
 let plantUmlQueue = Promise.resolve();
@@ -234,7 +235,7 @@ async function runPlantUmlOperation(operation) {
     }
 }
 function rasterizeSvgToPng(svg, fontBuffers, targetWidth) {
-    const options = {
+    const baseOptions = {
         background: "white",
         font: {
             fontBuffers: [...fontBuffers],
@@ -242,9 +243,16 @@ function rasterizeSvgToPng(svg, fontBuffers, targetWidth) {
             sansSerifFamily: "DejaVu Sans",
             monospaceFamily: "DejaVu Sans Mono",
         },
-        ...(targetWidth === undefined ? {} : { fitTo: { mode: "width", value: targetWidth } }),
     };
-    const resvg = new Resvg(svg, options);
+    let resvg = new Resvg(svg, baseOptions);
+    const effectiveTargetWidth = targetWidth ?? (resvg.width > MAX_AUTO_TARGET_WIDTH ? MAX_AUTO_TARGET_WIDTH : undefined);
+    if (effectiveTargetWidth !== undefined) {
+        resvg.free();
+        resvg = new Resvg(svg, {
+            ...baseOptions,
+            fitTo: { mode: "width", value: effectiveTargetWidth },
+        });
+    }
     let image;
     try {
         image = resvg.render();

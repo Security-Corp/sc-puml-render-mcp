@@ -71,7 +71,6 @@ type RenderDiagramStructuredContent = {
   };
 };
 
-const DEFAULT_MARKDOWN_TARGET_WIDTH = 1_200;
 const MIN_TARGET_WIDTH = 64;
 const MAX_TARGET_WIDTH = 4_096;
 const OUTPUT_DIR = path.join(tmpdir(), "sc-puml-render-mcp");
@@ -115,7 +114,7 @@ export async function renderDiagram(
   const source = await resolveRenderInput(input, deps);
   const format = input.format ?? deps.defaultFormat;
   const writePngFile = format === "png" && input.writeFile !== false;
-  const targetWidth = normalizeTargetWidth(input.targetWidth, writePngFile);
+  const targetWidth = normalizeTargetWidth(input.targetWidth);
 
   const result = await deps.engine.render({
     source,
@@ -206,18 +205,14 @@ function sanitizeFileComponent(value: string): string {
   return sanitized;
 }
 
-function normalizeTargetWidth(
-  targetWidth: number | undefined,
-  writePngFile: boolean
-): number | undefined {
-  const width = targetWidth ?? (writePngFile ? DEFAULT_MARKDOWN_TARGET_WIDTH : undefined);
-  if (width === undefined) {
+function normalizeTargetWidth(targetWidth: number | undefined): number | undefined {
+  if (targetWidth === undefined) {
     return undefined;
   }
-  if (!Number.isFinite(width)) {
-    throw new Error(`targetWidth must be a finite positive integer, got ${width}`);
+  if (!Number.isFinite(targetWidth)) {
+    throw new Error(`targetWidth must be a finite positive integer, got ${targetWidth}`);
   }
-  return Math.min(MAX_TARGET_WIDTH, Math.max(MIN_TARGET_WIDTH, Math.round(width)));
+  return Math.min(MAX_TARGET_WIDTH, Math.max(MIN_TARGET_WIDTH, Math.round(targetWidth)));
 }
 
 function pngDimensions(bytes: Uint8Array): PngDimensions {
