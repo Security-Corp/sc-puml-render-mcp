@@ -1,0 +1,31 @@
+{
+  "name": "sc-puml-render",
+  "version": "0.0.2",
+  "description": "Render PlantUML diagrams inline in Codex and Claude-compatible MCP clients with a local WASM engine.",
+  "author": {
+    "name": "Security-Corp",
+    "url": "https://github.com/Security-Corp"
+  },
+  "homepage": "https://github.com/Security-Corp/sc-puml-render-mcp",
+  "repository": "https://github.com/Security-Corp/sc-puml-render-mcp",
+  "license": "Apache-2.0",
+  "keywords": ["plantuml", "mcp", "diagram", "uml", "wasm", "codex"],
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "SC PlantUML Render",
+    "shortDescription": "Render PlantUML diagrams inline from local MCP tools.",
+    "longDescription": "Use SC PlantUML Render in Codex to render PlantUML source into inline PNG diagrams through a local stdio MCP server. The default WASM engine runs in-process and keeps diagram source on the machine unless a remote engine is explicitly configured.",
+    "developerName": "Security-Corp",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read"],
+    "websiteURL": "https://github.com/Security-Corp/sc-puml-render-mcp",
+    "privacyPolicyURL": "https://github.com/Security-Corp/sc-puml-render-mcp/blob/main/PRIVACY.md",
+    "brandColor": "#2563EB",
+    "defaultPrompt": [
+      "Render this PlantUML inline",
+      "Validate this PlantUML diagram",
+      "Resolve includes for this PlantUML file"
+    ],
+    "screenshots": []
+  }
+}
