@@ -42,6 +42,7 @@
     "@types/jsdom": "28.0.3",
     "@types/node": "^20.0.0",
     "@types/opentype.js": "1.3.10",
+    "esbuild": "^0.28.1",
     "typescript": "^5.5.0"
   }
 }
