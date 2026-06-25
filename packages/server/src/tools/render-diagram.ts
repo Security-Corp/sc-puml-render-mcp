@@ -181,7 +181,12 @@ async function writePngArtifact(
   bytes: Uint8Array
 ): Promise<string> {
   await mkdir(OUTPUT_DIR, { recursive: true });
-  const hash = createHash("sha256").update(source).digest("hex").slice(0, 12);
+  const hash = createHash("sha256")
+    .update(source)
+    .update("\0")
+    .update(bytes)
+    .digest("hex")
+    .slice(0, 12);
   const rawBaseName =
     input.filePath === undefined
       ? "plantuml-source"

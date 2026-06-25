@@ -15,9 +15,10 @@ PNG/JPEG conversion unless they explicitly asked for source code only.
 
 1. Include the PlantUML source in a fenced `plantuml` code block when the user should see or reuse
    the source.
-2. Call `mcp__sc_puml_render.render_diagram` with the exact same `source` and `format: "png"` before
-   the final response. Omit `writeFile` or set it to `true` so the default file-backed Markdown
-   output is available.
+2. Call `mcp__sc_puml_render.render_diagram` with the exact same `source`, `format: "png"`, and
+   `targetWidth: 1600` before the final response. Omit `writeFile` or set it to `true` so the
+   default file-backed Markdown output is available. Only omit `targetWidth` when the user
+   explicitly asks for native-size output.
 3. If the source comes from a local `.puml`, `.plantuml`, or `.iuml` file and the user wants that
    file rendered, call `render_diagram` with `filePath` instead.
 4. In the final response, insert the returned `structuredContent.markdownImage` string exactly as
@@ -31,6 +32,8 @@ PNG/JPEG conversion unless they explicitly asked for source code only.
 ## Output Rules
 
 - Prefer PNG for inline chat display.
+- For Codex final answers, use `targetWidth: 1600` so the Markdown image has enough raster width to
+  fill the chat column while remaining sharp on high-DPI displays.
 - Do not write "shown above" or similar unless the final response itself contains the
   `markdownImage` Markdown image.
 - Do not describe the plugin mechanics unless the user asks.

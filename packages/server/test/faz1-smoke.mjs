@@ -209,6 +209,11 @@ async function assertDefaultWidthPolicy() {
   const explicitSize = imagePngSize(explicit, "explicit targetWidth");
   assert.equal(explicitSize.width, 640, "explicit targetWidth should win");
   await assertMarkdownPngMetadata(explicit, "explicit targetWidth");
+  assert.notEqual(
+    explicit.structuredContent.filePath,
+    defaultSmall.structuredContent.filePath,
+    "different raster dimensions should use distinct Markdown artifact paths"
+  );
 
   const capped = await renderDiagram({ source: wideCapSource }, defaultToolDeps);
   const cappedSize = imagePngSize(capped, "wide auto-cap");
