@@ -1,0 +1,12 @@
+{
+  "name": "sc-puml-render-mcp",
+  "owner": { "name": "Security-Corp" },
+  "description": "PlantUML inline-render MCP server for Claude Code.",
+  "plugins": [
+    {
+      "name": "sc-puml-render",
+      "source": "./",
+      "description": "Render PlantUML inline (wasm, no Java/Graphviz/Docker; source stays local)."
+    }
+  ]
+}

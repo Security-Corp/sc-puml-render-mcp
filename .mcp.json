@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "sc-puml-render": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/packages/server/dist/index.js"],
+      "env": {
+        "PUML_ENGINE": "wasm",
+        "PUML_BASE_DIR": "${CLAUDE_PROJECT_DIR}"
+      }
+    }
+  }
+}
